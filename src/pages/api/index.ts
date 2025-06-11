@@ -1,39 +1,75 @@
-import flow from "lodash.flow";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { parse, type Node } from "svg-parser";
-import { StatusCodes } from "http-status-codes";
-
-import { Options } from "@/utils/types";
-
-import { clean } from "./lib/clean";
-import { stringify } from "./lib/stringify";
 import { reactify } from "./lib/reactify";
-import { transform } from "./lib/transform";
 
-export type Data = {
-  jsx?: string;
-  error?: unknown;
+// Function to convert filename to PascalCase component name
+const getComponentName = (filename: string): string => {
+  // Remove file extension and convert to PascalCase
+  return filename
+    .replace(/\.[^/.]+$/, "") // Remove extension
+    .split(/[-_\s]/) // Split by hyphen, underscore, or space
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join("");
 };
 
-export const svg2jsx = flow(
-  (svg: string, options: Options) => clean(svg, options?.cleanupIds),
-  (svg: string) => parse(svg),
-  (node: Node) => transform(node),
-  (node: Node) => stringify(node),
-);
+// Function to convert SVG to JSX
+export const svg2jsx = async (svg: string, options = {}) => {
+  return reactify(svg, {
+    typescript: true,
+    cleanupIds: false,
+    ...options,
+  });
+};
 
-export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
-    res.status(StatusCodes.METHOD_NOT_ALLOWED);
-    return null;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const result = svg2jsx(req.body.input.svg, req.body.input.options);
-    const jsx = await reactify(result, req.body.input.options);
-    res.status(StatusCodes.OK).json({ jsx });
+    console.log("Request body:", JSON.stringify(req.body, null, 2));
+
+    // Handle both formats (with and without input wrapper)
+    const data = req.body.input || req.body;
+    const { svg, filename, options = {} } = data;
+
+    if (!svg) {
+      console.error("Missing SVG content in request:", data);
+      return res.status(400).json({ error: "SVG content is required" });
+    }
+
+    if (!filename) {
+      console.error("Missing filename in request:", data);
+      return res.status(400).json({ error: "Filename is required" });
+    }
+
+    console.log("Processing file:", filename);
+    const componentName = getComponentName(filename);
+    console.log("Generated component name:", componentName);
+
+    const jsx = await reactify(
+      svg,
+      {
+        typescript: true,
+        cleanupIds: false,
+        ...options,
+      },
+      componentName,
+    );
+
+    console.log("Successfully generated JSX for", filename);
+    return res.status(200).json({ jsx });
   } catch (error) {
-    console.error(error);
-    res.status(StatusCodes.BAD_REQUEST).json({ error });
+    console.error("Error processing SVG:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      });
+    }
+    return res.status(500).json({
+      error: "Failed to process SVG",
+      details: error instanceof Error ? error.message : String(error),
+    });
   }
-};
+}

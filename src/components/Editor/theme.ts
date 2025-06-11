@@ -20,4 +20,8 @@ const createAceEditorStylesheet = (require: RequireType, exports: ExportsType) =
   require("../lib/dom").importCssString(null, "ace_svg2jsx");
 };
 
-ace.define("ace/theme/svg2jsx", ["require", "exports", "module", "ace/lib/dom"], createAceEditorStylesheet);
+ace.define(
+  "ace/theme/svg2jsx",
+  ["require", "exports", "module", "ace/lib/dom"],
+  createAceEditorStylesheet,
+);

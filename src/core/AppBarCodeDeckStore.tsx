@@ -11,19 +11,21 @@ import { readAndFormatFileContents } from "@/utils/helpers";
 export interface AppBarCodeDeckStoreContextType {
   svg?: string;
   jsx?: string;
-  memo?: boolean;
+  filename?: string;
   typescript?: boolean;
-  jsxSingleQuote?: boolean;
   cleanupIds?: boolean;
+  memo?: boolean;
+  jsxSingleQuote?: boolean;
   isSuccess?: boolean;
   isError?: boolean;
   isPending?: boolean;
   isCopied?: boolean;
   setSvg: (value: string | undefined) => void;
-  setMemo: () => void;
+  setFilename: (value: string | undefined) => void;
   setTypeScript: () => void;
-  setJsxSingleQuote: () => void;
   setCleanupIds: () => void;
+  setMemo: () => void;
+  setJsxSingleQuote: () => void;
   handleCopy: () => void;
   handleDrop: (files: ReadonlyArray<File>) => Promise<void>;
 }
@@ -35,31 +37,34 @@ export interface AppBarCodeDeckStoreProps extends React.HtmlHTMLAttributes<HTMLD
 export const AppBarCodeDeckStoreContext = createContext<AppBarCodeDeckStoreContextType>({
   svg: undefined,
   jsx: undefined,
-  memo: undefined,
+  filename: undefined,
   typescript: undefined,
-  jsxSingleQuote: undefined,
   cleanupIds: undefined,
+  memo: undefined,
+  jsxSingleQuote: undefined,
   isSuccess: undefined,
   isError: undefined,
   isPending: undefined,
   isCopied: undefined,
   setSvg: () => {},
-  setMemo: () => {},
+  setFilename: () => {},
   setTypeScript: () => {},
-  setJsxSingleQuote: () => {},
   setCleanupIds: () => {},
+  setMemo: () => {},
+  setJsxSingleQuote: () => {},
   handleDrop: async () => {},
   handleCopy: () => {},
 });
 
 export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ children }) => {
   const [svg, setSvg] = useState<string | undefined>();
+  const [filename, setFilename] = useState<string | undefined>();
   const [copied, copyToClipboard] = useCopyToClipboard();
 
-  const [memo, setMemo] = useLocalStorageToggle("memo");
   const [typescript, setTypeScript] = useLocalStorageToggle("typescript");
-  const [jsxSingleQuote, setJsxSingleQuote] = useLocalStorageToggle("jsxSingleQuote");
   const [cleanupIds, setCleanupIds] = useLocalStorageToggle("cleanupIds");
+  const [memo, setMemo] = useLocalStorageToggle("memo");
+  const [jsxSingleQuote, setJsxSingleQuote] = useLocalStorageToggle("jsxSingleQuote");
 
   const { jsx, isSuccess, isError, isPending, mutate, reset } = useApi();
 
@@ -72,12 +77,14 @@ export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ childr
   const clear = useCallback(() => {
     reset();
     setSvg(undefined);
+    setFilename(undefined);
   }, [reset]);
 
   const handleDrop = useCallback(async ([file]: ReadonlyArray<File>) => {
     try {
       const fileContents = await readAndFormatFileContents(file);
       setSvg(fileContents);
+      setFilename(file.name);
     } catch (error) {}
   }, []);
 
@@ -91,14 +98,23 @@ export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ childr
 
   useDebouncedEffect(
     () => {
-      if (svg) {
-        mutate({ input: { svg, options: { memo, typescript, jsxSingleQuote, cleanupIds } } });
+      if (svg && filename) {
+        mutate({
+          input: {
+            svg,
+            filename,
+            options: {
+              typescript,
+              cleanupIds,
+            },
+          },
+        });
       } else {
         clear();
       }
     },
     EDITOR_DEBOUNCE_TIME,
-    [svg, memo, typescript, jsxSingleQuote, cleanupIds, mutate, clear],
+    [svg, filename, typescript, cleanupIds, mutate, clear],
   );
 
   return (
@@ -106,19 +122,21 @@ export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ childr
       value={{
         svg,
         jsx,
-        memo,
+        filename,
         typescript,
-        jsxSingleQuote,
         cleanupIds,
+        memo,
+        jsxSingleQuote,
         isSuccess,
         isError,
         isPending,
         isCopied,
         setSvg,
-        setMemo,
+        setFilename,
         setTypeScript,
-        setJsxSingleQuote,
         setCleanupIds,
+        setMemo,
+        setJsxSingleQuote,
         handleDrop,
         handleCopy,
       }}

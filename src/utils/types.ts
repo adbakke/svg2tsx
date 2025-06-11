@@ -8,6 +8,7 @@ export type Options = {
 export type Variables = {
   input: {
     svg: string;
-    options: Options;
+    filename: string;
+    options?: Partial<Options>;
   };
 };
