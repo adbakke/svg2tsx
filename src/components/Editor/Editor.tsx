@@ -3,7 +3,7 @@ import AceEditor from "react-ace";
 import resolveConfig from "tailwindcss/resolveConfig";
 import tailwindConfig from "tailwindcss/defaultConfig";
 
-import "brace/mode/svg";
+// Import modes without workers
 import "brace/mode/jsx";
 import "@/components/Editor/theme";
 
@@ -20,6 +20,8 @@ const editorDefaultProps = {
      * Disable code folding.
      */
     showFoldWidgets: false,
+    // Disable workers to prevent SVG worker errors
+    useWorker: false,
   },
   editor: {
     /**
@@ -40,7 +42,7 @@ export const Editor: React.FC<EditorProps> = ({ mode, value, readOnly, onChange 
       fontSize={fontSize}
       lineHeight={lineHeight}
       theme="svg2jsx"
-      mode={mode}
+      mode={mode === "svg" ? "jsx" : mode} // Use JSX mode for SVG to avoid worker issues
       value={value}
       readOnly={readOnly}
       onChange={onChange}

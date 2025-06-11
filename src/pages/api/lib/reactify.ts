@@ -1,33 +1,56 @@
-import { template } from "lodash";
-import { format } from "prettier";
+import { optimize } from "svgo";
+import { Options } from "@/pages/api/lib/types";
 
-import type { Options } from "@/utils/types";
+const wrapPathData = (pathData: string, indent: number): string => {
+  if (pathData.length <= 80) return pathData;
 
-const defaultReactComponent = `
-  import * as React from "react";
+  const indentStr = ' '.repeat(indent);
+  // Split at command letters (M, L, C, etc.) to keep path commands together
+  const segments = pathData.match(/[MLHVCSQTAZmlhvcsqtaz][^MLHVCSQTAZmlhvcsqtaz]*/g) || [];
+  return segments.join(`\n${indentStr}`);
+};
 
-  <%= definitions %> = (props) => (
-    <%= svg %>
-  );
+export const reactify = async (svg: string, options: Options, componentName: string = 'SvgIcon'): Promise<string> => {
+  try {
+    const { typescript = false, cleanupIds = false } = options;
 
-  <%= exports %>
-`;
+    // Basic SVG optimization
+    const optimizedSvg = optimize(svg).data;
 
-export const reactify = async (svg: string, { typescript, memo, jsxSingleQuote }: Options) => {
-  const render = template(defaultReactComponent);
+    // Format SVG properties and children
+    const formattedSvg = optimizedSvg
+      // Format SVG opening tag with attributes
+      .replace(/<svg([^>]*)>/g, (match: string, attrs: string) => {
+        // Remove any existing class attribute since we'll use className
+        const cleanAttrs = attrs.replace(/\s+class="[^"]*"/, '');
+        const formattedAttrs = cleanAttrs
+          .trim()
+          .split(/\s+/)
+          .map((attr: string) => `        ${attr}`)
+          .join('\n');
+        return `    <svg\n        className={className}\n${formattedAttrs}>`;
+      })
+      // Format SVG closing tag
+      .replace(/<\/svg>/g, '\n    </svg>')
+      // Format children (like path) with their attributes on one line
+      .replace(/(<[^>]*>)/g, (match: string) => {
+        if (match.startsWith('</')) return match;
+        return `\n        ${match}`;
+      })
+      // Clean up any double newlines
+      .replace(/\n\s*\n/g, '\n')
+      .trim();
 
-  const parser = typescript ? "typescript" : "babel";
-  const definitions = typescript ? "const SvgIcon: React.FC<React.SVGProps<SVGElement>>" : "const SvgIcon";
-  const exports = memo ? "export default React.memo(SvgIcon);" : "export default SvgIcon;";
+    // Convert to React component with proper indentation
+    const jsx = `const ${componentName} = ({ className = '' }: { className?: string }) => (
+    ${formattedSvg}
+)
 
-  const component = render({
-    svg,
-    exports,
-    definitions,
-  });
+export default ${componentName}`;
 
-  return await format(component, {
-    parser,
-    jsxSingleQuote,
-  });
+    return jsx;
+  } catch (error) {
+    console.error('Error in reactify:', error);
+    throw new Error(`Failed to convert SVG to React component: ${error instanceof Error ? error.message : String(error)}`);
+  }
 };

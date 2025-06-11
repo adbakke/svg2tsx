@@ -9,19 +9,17 @@ import { Text } from "@/components/Text";
 import { Checkbox } from "@/components/Checkbox";
 import { SvgIconGear, SvgIconPending } from "@/components/SvgIcon";
 
-export interface AppBarSettingsProps extends React.HtmlHTMLAttributes<HTMLDivElement> {}
+export interface AppBarSettingsProps extends React.HtmlHTMLAttributes<HTMLDivElement> { }
 
 export const AppBarSettings: React.FC<AppBarSettingsProps> = (props) => {
   const {
     memo,
-    typescript,
     jsxSingleQuote,
     cleanupIds,
     isSuccess,
     isError,
     isPending,
     setMemo,
-    setTypeScript,
     setJsxSingleQuote,
     setCleanupIds,
   } = useCodeDeck();
@@ -46,11 +44,6 @@ export const AppBarSettings: React.FC<AppBarSettingsProps> = (props) => {
             <Checkbox name="memo" checked={memo} onChange={setMemo}>
               <Text variant="overline">
                 <FormattedMessage id="APPBAR_SETTINGS_MEMO" />
-              </Text>
-            </Checkbox>
-            <Checkbox name="typescript" checked={typescript} onChange={setTypeScript}>
-              <Text variant="overline">
-                <FormattedMessage id="APPBAR_SETTINGS_TYPESCRIPT" />
               </Text>
             </Checkbox>
           </>
