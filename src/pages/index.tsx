@@ -5,6 +5,7 @@ import copy from "@/data/copy/en-EN.json";
 import { AppBar } from "@/components/AppBar";
 import { AppCodeDeck } from "@/components/AppCodeDeck";
 import { AppBarSettings } from "@/components/AppBarSettings";
+import { BatchProcessor } from '@/components/BatchProcessor/BatchProcessor';
 
 export default () => {
   return (
@@ -16,6 +17,7 @@ export default () => {
       <AppBar />
       <AppBarSettings />
       <AppCodeDeck />
+      <BatchProcessor />
     </>
   );
 };
