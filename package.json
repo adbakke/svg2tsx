@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --config jest.config.ts",
-    "lint": "biome ci ./src/**/*",
-    "format": "biome format ./src/**/* --write",
+    "lint": "biome ci src",
+    "format": "biome format src --write",
     "prepare": "husky"
   },
   "dependencies": {
