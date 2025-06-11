@@ -42,7 +42,7 @@ describe("svg2jsx tests", () => {
       `<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
         <path style="margin-left: auto;" d="M12,9.9c-1.1,0-2.1,0.9-2.1,2.1c0,1.1,0.9,2.1,2.1,2.1c1.1,0,2.1-0.9,2.1-2.1C14.1,10.9,13.1,9.9,12,9.9z" />
       </svg>`,
-      {}
+      {},
     );
 
     expect(jsx).toEqual(expect.stringMatching(/marginLeft: "auto"/));
@@ -59,7 +59,7 @@ describe("svg2jsx tests", () => {
         </defs>
         <circle cx="110" cy="110" r="100" fill="#9c6" clip-path="url(#svg-test)" />
       </svg>`,
-      {}
+      {},
     );
 
     expect(jsx).toEqual(expect.not.stringMatching(/>\s*>/gm));
@@ -75,7 +75,7 @@ describe("svg2jsx tests", () => {
       `<svg width="200px" height="200px" viewBox="0 0 100 100">
         <text>svg2jsx</text>
       </svg>`,
-      {}
+      {},
     );
 
     expect(jsx.match(/<text>svg2jsx<\/text>/g)).toHaveLength(1);
@@ -87,7 +87,7 @@ describe("svg2jsx tests", () => {
       `<svg width="125px" height="125px" viewBox="0 0 125 125">
         <path d="M49 3L49 27L61 15L49 3" fill="#ff0000"></path>
       </svg>`,
-      {}
+      {},
     );
 
     expect(jsx.match(/width="125"/g)).toHaveLength(1);
@@ -101,7 +101,7 @@ describe("svg2jsx tests", () => {
         <circle id="svg-test" cx="5" cy="5" r="4" stroke="blue"/>
         <use href="#svg-test" x="20" fill="white" stroke="red"/>
       </svg>`,
-      {}
+      {},
     );
 
     expect(jsx.match(/id="svg-test"/g)).toHaveLength(1);

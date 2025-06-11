@@ -46,14 +46,14 @@ export const AppBarCodeDeckStoreContext = createContext<AppBarCodeDeckStoreConte
   isError: undefined,
   isPending: undefined,
   isCopied: undefined,
-  setSvg: () => { },
-  setFilename: () => { },
-  setTypeScript: () => { },
-  setCleanupIds: () => { },
-  setMemo: () => { },
-  setJsxSingleQuote: () => { },
-  handleDrop: async () => { },
-  handleCopy: () => { },
+  setSvg: () => {},
+  setFilename: () => {},
+  setTypeScript: () => {},
+  setCleanupIds: () => {},
+  setMemo: () => {},
+  setJsxSingleQuote: () => {},
+  handleDrop: async () => {},
+  handleCopy: () => {},
 });
 
 export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ children }) => {
@@ -85,14 +85,14 @@ export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ childr
       const fileContents = await readAndFormatFileContents(file);
       setSvg(fileContents);
       setFilename(file.name);
-    } catch (error) { }
+    } catch (error) {}
   }, []);
 
   const handleCopy = useCallback(async () => {
     if (jsx) {
       try {
         await copyToClipboard(jsx);
-      } catch (error) { }
+      } catch (error) {}
     }
   }, [jsx, copyToClipboard]);
 
@@ -105,9 +105,9 @@ export const AppBarCodeDeckStore: React.FC<AppBarCodeDeckStoreProps> = ({ childr
             filename,
             options: {
               typescript,
-              cleanupIds
-            }
-          }
+              cleanupIds,
+            },
+          },
         });
       } else {
         clear();

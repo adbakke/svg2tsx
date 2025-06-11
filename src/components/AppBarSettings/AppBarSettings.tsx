@@ -9,7 +9,7 @@ import { Text } from "@/components/Text";
 import { Checkbox } from "@/components/Checkbox";
 import { SvgIconGear, SvgIconPending } from "@/components/SvgIcon";
 
-export interface AppBarSettingsProps extends React.HtmlHTMLAttributes<HTMLDivElement> { }
+export interface AppBarSettingsProps extends React.HtmlHTMLAttributes<HTMLDivElement> {}
 
 export const AppBarSettings: React.FC<AppBarSettingsProps> = (props) => {
   const {
@@ -27,7 +27,10 @@ export const AppBarSettings: React.FC<AppBarSettingsProps> = (props) => {
   const isClient = useIsClient();
 
   return (
-    <div className="bg-appbar-1 border-b-2 border-gray-250 grid grid-cols-12 py-3 px-6 relative" {...props}>
+    <div
+      className="bg-appbar-1 border-b-2 border-gray-250 grid grid-cols-12 py-3 px-6 relative"
+      {...props}
+    >
       <div className="col-span-4 flex items-center justify-start gap-4 text-gray-50">
         {isClient ? (
           <>

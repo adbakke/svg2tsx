@@ -28,7 +28,13 @@ export default ({ Component, pageProps }: AppProps) => {
     <IntlProvider locale="en-EN" messages={copy}>
       <QueryClientProvider client={client}>
         <AppBarCodeDeckStore>
-          <div className={twMerge(robotoSans400.variable, inconsolata400.variable, "font-sans flex flex-col h-screen")}>
+          <div
+            className={twMerge(
+              robotoSans400.variable,
+              inconsolata400.variable,
+              "font-sans flex flex-col h-screen",
+            )}
+          >
             <Component {...pageProps} />
           </div>
         </AppBarCodeDeckStore>
