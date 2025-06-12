@@ -132,10 +132,7 @@ export const BatchProcessor: React.FC = () => {
     });
     const content = await zip.generateAsync({ type: "blob" });
 
-    // Format: <folder>-svg2tsx-YYYYMMDD-HHMMSS.zip
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, "0");
-    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    // Format: <folder>.zip (or svg2tsx-batch.zip if no folder name)
     const zipName = `${rootFolder || "svg2tsx-batch"}.zip`;
 
     const url = URL.createObjectURL(content);
