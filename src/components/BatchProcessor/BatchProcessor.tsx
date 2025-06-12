@@ -17,6 +17,7 @@ export const BatchProcessor: React.FC = () => {
   const [convertedFiles, setConvertedFiles] = useState<Array<{ name: string; content: string }>>(
     [],
   );
+  const [rootFolder, setRootFolder] = useState<string | null>(null);
 
   const onDrop = async (acceptedFiles: File[]) => {
     console.log("Files dropped:", acceptedFiles);
@@ -126,20 +127,18 @@ export const BatchProcessor: React.FC = () => {
 
   const downloadAll = async () => {
     const zip = new JSZip();
-
-    // Add all files to the zip
     convertedFiles.forEach((file) => {
       zip.file(file.name, file.content);
     });
-
-    // Generate the zip file
     const content = await zip.generateAsync({ type: "blob" });
 
-    // Create download link
+    // Format: <folder>.zip (or svg2tsx-batch.zip if no folder name)
+    const zipName = `${rootFolder || "svg2tsx-batch"}.zip`;
+
     const url = URL.createObjectURL(content);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "converted-svg-files.zip";
+    a.download = zipName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -151,6 +150,46 @@ export const BatchProcessor: React.FC = () => {
     accept: {
       "image/svg+xml": [".svg"],
     },
+    getFilesFromEvent: async (event) => {
+      const files: File[] = [];
+      let foundRoot = false;
+      let rootName = "";
+      const dt = (event as any).dataTransfer;
+      if (dt && dt.items) {
+        const traverseFileTree = async (item: any, path = ""): Promise<void> => {
+          return new Promise<void>((resolve) => {
+            if (item.isFile) {
+              item.file((file: File) => {
+                if (file.name.toLowerCase().endsWith(".svg")) {
+                  files.push(file);
+                }
+                resolve();
+              });
+            } else if (item.isDirectory) {
+              if (!foundRoot) {
+                rootName = item.name;
+                foundRoot = true;
+              }
+              const dirReader = item.createReader();
+              dirReader.readEntries(async (entries: any[]) => {
+                for (const entry of entries) {
+                  await traverseFileTree(entry, path + item.name + "/");
+                }
+                resolve();
+              });
+            }
+          });
+        };
+        const entries: any[] = [];
+        for (const item of dt.items) {
+          const entry = item.webkitGetAsEntry && item.webkitGetAsEntry();
+          if (entry) entries.push(entry);
+        }
+        await Promise.all(entries.map((entry) => traverseFileTree(entry)));
+      }
+      setRootFolder(rootName || null);
+      return files;
+    },
     onDragEnter: () => console.log("Drag enter"),
     onDragLeave: () => console.log("Drag leave"),
     onDropRejected: (rejectedFiles) => console.log("Files rejected:", rejectedFiles),
@@ -160,9 +199,8 @@ export const BatchProcessor: React.FC = () => {
     <div className="p-4">
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${
-          isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-        }`}
+        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          }`}
       >
         <input {...getInputProps()} />
         {processing ? (
